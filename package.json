@@ -1,0 +1,50 @@
+{
+  "name": "@aptero/axolotis-module-loop",
+  "version": "1.0.0",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ApteroSAS/axolotis-module-loop.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ApteroSAS/axolotis-module-loop/issues"
+  },
+  "homepage": "https://github.com/ApteroSAS/axolotis-module-loop#readme",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.js -t",
+    "dev": "node scripts/build.js -t -w",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@aptero/axolotis-module-id-generator": "https://github.com/worph/axolotis-module-id-generator.git",
+    "axolotis-module-definition": "https://github.com/worph/axolotis-module-definition.git",
+    "inversify": "^6.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.4.3",
+    "@types/jest": "^29.4.0",
+    "typescript": "^4.9.5",
+
+    "fs-extra": "^10.0.0",
+    "esbuild": "^0.14.5",
+    "ora": "^6.0.1",
+    "gradient-string": "^2.0.0",
+    "sloc": "^0.2.1",
+    "human-readable": "^0.2.1",
+    "brotli-size": "^4.0.0",
+    "gzip-size": "^7.0.0",
+    "minimist": "^1.2.5"
+  }
+}

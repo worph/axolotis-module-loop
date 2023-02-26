@@ -28,7 +28,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@aptero/axolotis-module-id-generator": "https://github.com/worph/axolotis-module-id-generator.git",
+    "@aptero/axolotis-module-id-generator": "*",
     "axolotis-module-definition": "https://github.com/worph/axolotis-module-definition.git",
     "inversify": "^6.0.1"
   },

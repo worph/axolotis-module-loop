@@ -1,6 +1,6 @@
+import {makeid} from "@aptero/axolotis-module-id-generator";
 import {LoopInterface} from "./LoopInterface";
 import {PerfLog} from "./PerfLog";
-import {makeid} from "@aptero/axolotis-module-id-generator";
 
 export class SetIntervalLoop extends PerfLog implements LoopInterface {
     loops: { [id: string]: { loopName: string, iterationCallback: (delta: number) => void } } = {};

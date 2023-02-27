@@ -4425,14 +4425,14 @@ __export(src_exports, {
   ANIMATION_FRAME_LOOP: () => ANIMATION_FRAME_LOOP,
   AxLoopModule: () => AxLoopModule,
   FrameLoop: () => FrameLoop,
-  INTERVAL_SET_1S: () => INTERVAL_SET_1S,
-  LoopServiceID: () => LoopServiceID
+  FrameLoopName: () => FrameLoopName,
+  INTERVAL_SET_1S: () => INTERVAL_SET_1S
 });
 module.exports = __toCommonJS(src_exports);
 var import_inversify2 = __toESM(require_inversify(), 1);
 
 // src/Identifier.ts
-var LoopServiceID = Symbol.for("LoopServiceID");
+var FrameLoopName = Symbol.for("FrameLoopName");
 
 // src/services/loop/PerfLog.ts
 var PerfLog = class {
@@ -8783,7 +8783,7 @@ var require_inversify2 = __commonJS2({
   }
 });
 var import_inversify = __toESM2(require_inversify2(), 1);
-var IdServiceID = Symbol.for("IdServiceID");
+var IdServiceName = Symbol.for("IdServiceName");
 function makeid(length) {
   let result = "";
   let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -8918,20 +8918,13 @@ var FrameLoop = class {
   addLoop(loopName, iterationCallback, loopType = ANIMATION_FRAME_LOOP) {
     return this.loopType[loopType].addLoop(loopName, iterationCallback);
   }
-  getType() {
-    return FrameLoop.name;
-  }
 };
 
 // src/index.ts
 var AxLoopModule = class {
   getModule() {
-    console.log("AxBasicModule installed 2");
     return new import_inversify2.ContainerModule((bind) => {
-      bind(FrameLoop.name).toDynamicValue(() => {
-        return new FrameLoop();
-      }).inSingletonScope();
-      bind(LoopServiceID).toDynamicValue(() => {
+      bind(FrameLoopName).toDynamicValue(() => {
         return new FrameLoop();
       }).inSingletonScope();
     });
@@ -8942,7 +8935,7 @@ var AxLoopModule = class {
   ANIMATION_FRAME_LOOP,
   AxLoopModule,
   FrameLoop,
-  INTERVAL_SET_1S,
-  LoopServiceID
+  FrameLoopName,
+  INTERVAL_SET_1S
 });
 //# sourceMappingURL=index.cjs.map

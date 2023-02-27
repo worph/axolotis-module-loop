@@ -14,6 +14,5 @@ export declare class FrameLoop {
         };
     };
     addLoop(loopName: string, iterationCallback: (delta: number) => void, loopType?: string): () => void;
-    getType(): string;
 }
 //# sourceMappingURL=FrameLoop.d.ts.map

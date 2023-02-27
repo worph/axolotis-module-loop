@@ -50,7 +50,4 @@ export class FrameLoop {
         return this.loopType[loopType].addLoop(loopName, iterationCallback);
     }
 
-    getType(): string {
-        return FrameLoop.name;
-    }
 }

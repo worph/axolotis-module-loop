@@ -4423,7 +4423,7 @@ var require_inversify = __commonJS({
 var src_exports = {};
 __export(src_exports, {
   ANIMATION_FRAME_LOOP: () => ANIMATION_FRAME_LOOP,
-  AxBasicModule: () => AxBasicModule,
+  AxLoopModule: () => AxLoopModule,
   FrameLoop: () => FrameLoop,
   INTERVAL_SET_1S: () => INTERVAL_SET_1S,
   LoopServiceID: () => LoopServiceID
@@ -8924,7 +8924,7 @@ var FrameLoop = class {
 };
 
 // src/index.ts
-var AxBasicModule = class {
+var AxLoopModule = class {
   getModule() {
     console.log("AxBasicModule installed 2");
     return new import_inversify2.ContainerModule((bind) => {
@@ -8940,7 +8940,7 @@ var AxBasicModule = class {
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   ANIMATION_FRAME_LOOP,
-  AxBasicModule,
+  AxLoopModule,
   FrameLoop,
   INTERVAL_SET_1S,
   LoopServiceID

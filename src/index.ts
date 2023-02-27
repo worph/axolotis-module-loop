@@ -7,7 +7,7 @@ export * from "./services/loop/FrameLoop";
 
 export * from "./Identifier";
 
-export class AxBasicModule implements AxModule{
+export class AxLoopModule implements AxModule{
     getModule(): ContainerModule {
         console.log("AxBasicModule installed 2");
         return new ContainerModule((bind: interfaces.Bind) => {

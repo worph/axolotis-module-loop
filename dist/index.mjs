@@ -8910,7 +8910,7 @@ var FrameLoop = class {
 };
 
 // src/index.ts
-var AxBasicModule = class {
+var AxLoopModule = class {
   getModule() {
     console.log("AxBasicModule installed 2");
     return new import_inversify2.ContainerModule((bind) => {
@@ -8925,7 +8925,7 @@ var AxBasicModule = class {
 };
 export {
   ANIMATION_FRAME_LOOP,
-  AxBasicModule,
+  AxLoopModule,
   FrameLoop,
   INTERVAL_SET_1S,
   LoopServiceID

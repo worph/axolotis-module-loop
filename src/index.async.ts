@@ -5,7 +5,7 @@ import {FrameLoop} from "./services/loop/FrameLoop";
 
 export * from "./Identifier";
 
-export class AxBasicModule implements AxModuleAsync{
+export class AxLoopModule implements AxModuleAsync{
     getModule(): AsyncContainerModule {
         return new AsyncContainerModule(async (bind: interfaces.Bind) => {
             bind(LoopServiceID).toDynamicValue(async () => {

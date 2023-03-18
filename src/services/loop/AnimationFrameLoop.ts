@@ -17,20 +17,16 @@ export class AnimationFrameLoop extends PerfLog implements LoopInterface {
     start() {
         let type = this.getType();
         const animate = (t) => {
-            try {
-                this.monitoringStart(type);
-                const delta = t - this.prevTime;
-                this.prevTime = t;
-                requestAnimationFrame(animate);
-                for (const callback in this.loops) {
-                    this.monitoringStart(this.loops[callback].loopName);
-                    this.loops[callback].iterationCallback(delta);
-                    this.monitoringEnd(this.loops[callback].loopName);
-                }
-                this.monitoringEnd(type);
-            } catch (e) {
-                console.error(e)
+            this.monitoringStart(type);
+            const delta = t - this.prevTime;
+            this.prevTime = t;
+            requestAnimationFrame(animate);
+            for (const callback in this.loops) {
+                this.monitoringStart(this.loops[callback].loopName);
+                this.loops[callback].iterationCallback(delta);
+                this.monitoringEnd(this.loops[callback].loopName);
             }
+            this.monitoringEnd(type);
         };
         requestAnimationFrame(animate);
     }

@@ -4423,10 +4423,13 @@ var require_inversify = __commonJS({
 var src_exports = {};
 __export(src_exports, {
   ANIMATION_FRAME_LOOP: () => ANIMATION_FRAME_LOOP,
+  AnimationFrameLoop: () => AnimationFrameLoop,
   AxLoopModule: () => AxLoopModule,
   FrameLoop: () => FrameLoop,
   FrameLoopName: () => FrameLoopName,
-  INTERVAL_SET_1S: () => INTERVAL_SET_1S
+  INTERVAL_SET_1S: () => INTERVAL_SET_1S,
+  PerfLog: () => PerfLog,
+  SetIntervalLoop: () => SetIntervalLoop
 });
 module.exports = __toCommonJS(src_exports);
 var import_inversify2 = __toESM(require_inversify(), 1);
@@ -8808,20 +8811,16 @@ var AnimationFrameLoop = class extends PerfLog {
   start() {
     let type = this.getType();
     const animate = (t) => {
-      try {
-        this.monitoringStart(type);
-        const delta = t - this.prevTime;
-        this.prevTime = t;
-        requestAnimationFrame(animate);
-        for (const callback in this.loops) {
-          this.monitoringStart(this.loops[callback].loopName);
-          this.loops[callback].iterationCallback(delta);
-          this.monitoringEnd(this.loops[callback].loopName);
-        }
-        this.monitoringEnd(type);
-      } catch (e) {
-        console.error(e);
+      this.monitoringStart(type);
+      const delta = t - this.prevTime;
+      this.prevTime = t;
+      requestAnimationFrame(animate);
+      for (const callback in this.loops) {
+        this.monitoringStart(this.loops[callback].loopName);
+        this.loops[callback].iterationCallback(delta);
+        this.monitoringEnd(this.loops[callback].loopName);
       }
+      this.monitoringEnd(type);
     };
     requestAnimationFrame(animate);
   }
@@ -8933,9 +8932,12 @@ var AxLoopModule = class {
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   ANIMATION_FRAME_LOOP,
+  AnimationFrameLoop,
   AxLoopModule,
   FrameLoop,
   FrameLoopName,
-  INTERVAL_SET_1S
+  INTERVAL_SET_1S,
+  PerfLog,
+  SetIntervalLoop
 });
 //# sourceMappingURL=index.cjs.map

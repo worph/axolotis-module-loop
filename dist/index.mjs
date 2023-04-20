@@ -4426,25 +4426,64 @@ var PerfLog = class {
   };
   monitoringEnd = () => {
   };
-  perfLog = {};
+  callbacks = [];
+  loopData = {};
+  onPerfLog(minimumRefreshInterval, callback) {
+    this.callbacks.push({
+      refreshInterval: minimumRefreshInterval,
+      last: 0,
+      cb: callback
+    });
+    this.enablePerfLog(true);
+    return () => {
+      this.callbacks = this.callbacks.filter((cb) => cb.cb !== callback);
+    };
+  }
   enablePerfLog(activated) {
     if (activated) {
-      let start = performance.now();
-      let sampleNumber = 0;
       this.monitoringStart = (loopName) => {
-        start = performance.now();
+        let loopDatum = this.loopData[loopName];
+        if (!loopDatum) {
+          loopDatum = {
+            minTimeMs: 0,
+            maxTimeMs: 0,
+            totalTimeMs: 0,
+            sampleNumber: 0,
+            meanTimeMs: 0,
+            start: 0
+          };
+          this.loopData[loopName] = loopDatum;
+        }
+        loopDatum.start = performance.now();
       };
       this.monitoringEnd = (loopName) => {
-        let time = performance.now() - start;
-        if (!this.perfLog[loopName]) {
-          this.perfLog[loopName] = { totalTimeMs: 0, sampleNumber: 0, meanTimeMs: 0 };
+        let loopDatum = this.loopData[loopName];
+        const nowTime = performance.now();
+        let time = nowTime - loopDatum.start;
+        for (let cb of this.callbacks) {
+          loopDatum.totalTimeMs += time;
+          loopDatum.sampleNumber++;
+          loopDatum.meanTimeMs = loopDatum.totalTimeMs / loopDatum.sampleNumber;
+          loopDatum.maxTimeMs = Math.max(loopDatum.maxTimeMs, time);
+          loopDatum.minTimeMs = Math.min(loopDatum.minTimeMs, time);
+          if (nowTime - cb.last > cb.refreshInterval) {
+            cb.cb(
+              loopName,
+              performance.timeOrigin + nowTime,
+              loopDatum.meanTimeMs,
+              loopDatum.minTimeMs,
+              loopDatum.maxTimeMs,
+              loopDatum.sampleNumber,
+              loopDatum.totalTimeMs
+            );
+            cb.last = nowTime;
+            loopDatum.totalTimeMs = 0;
+            loopDatum.sampleNumber = 0;
+            loopDatum.meanTimeMs = 0;
+            loopDatum.minTimeMs = Number.MAX_VALUE;
+            loopDatum.maxTimeMs = Number.MIN_VALUE;
+          }
         }
-        if (this.perfLog[loopName].sampleNumber > 1e3) {
-          this.perfLog[loopName] = { totalTimeMs: 0, sampleNumber: 0, meanTimeMs: 0 };
-        }
-        this.perfLog[loopName].totalTimeMs += time;
-        this.perfLog[loopName].sampleNumber++;
-        this.perfLog[loopName].meanTimeMs = this.perfLog[loopName].totalTimeMs / this.perfLog[loopName].sampleNumber;
       };
     } else {
       this.monitoringStart = () => {
@@ -4452,9 +4491,6 @@ var PerfLog = class {
       this.monitoringEnd = () => {
       };
     }
-  }
-  getPerfLog() {
-    return this.perfLog;
   }
 };
 
@@ -8794,7 +8830,6 @@ var AnimationFrameLoop = class extends PerfLog {
   start() {
     let type = this.getType();
     const animate = (t) => {
-      this.monitoringStart(type);
       const delta = t - this.prevTime;
       this.prevTime = t;
       requestAnimationFrame(animate);
@@ -8803,7 +8838,6 @@ var AnimationFrameLoop = class extends PerfLog {
         this.loops[callback].iterationCallback(delta);
         this.monitoringEnd(this.loops[callback].loopName);
       }
-      this.monitoringEnd(type);
     };
     requestAnimationFrame(animate);
   }
@@ -8837,9 +8871,7 @@ var SetIntervalLoop = class extends PerfLog {
     return this.type;
   }
   start() {
-    let loopName = this.getType();
     const animate = (t) => {
-      this.monitoringStart(loopName);
       const delta = t - this.prevTime;
       this.prevTime = t;
       for (const callbackKey in this.loops) {
@@ -8847,7 +8879,6 @@ var SetIntervalLoop = class extends PerfLog {
         this.loops[callbackKey].iterationCallback(delta);
         this.monitoringEnd(this.loops[callbackKey].loopName);
       }
-      this.monitoringEnd(loopName);
     };
     setInterval(animate, this.intervalMs);
   }
@@ -8890,12 +8921,14 @@ var FrameLoop = class {
       this.loopType[loopTypeKey].enablePerfLog(activated);
     }
   }
-  getPerfLog() {
-    let ret = {};
+  onPerfLog(minimumRefreshInterval, callback) {
+    let unsubscribe = [];
     for (const loopTypeKey in this.loopType) {
-      ret = { ...ret, ...this.loopType[loopTypeKey].getPerfLog() };
+      unsubscribe.push(this.loopType[loopTypeKey].onPerfLog(minimumRefreshInterval, callback));
     }
-    return ret;
+    return () => {
+      unsubscribe.forEach((unsub) => unsub());
+    };
   }
   addLoop(loopName, iterationCallback, loopType = ANIMATION_FRAME_LOOP) {
     return this.loopType[loopType].addLoop(loopName, iterationCallback);

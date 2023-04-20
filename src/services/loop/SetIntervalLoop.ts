@@ -15,9 +15,7 @@ export class SetIntervalLoop extends PerfLog implements LoopInterface {
     }
 
     start() {
-        let loopName = this.getType();
         const animate = (t) => {
-            this.monitoringStart(loopName);
             const delta = t - this.prevTime;
             this.prevTime = t;
             for (const callbackKey in this.loops) {
@@ -25,7 +23,6 @@ export class SetIntervalLoop extends PerfLog implements LoopInterface {
                 this.loops[callbackKey].iterationCallback(delta);
                 this.monitoringEnd(this.loops[callbackKey].loopName);
             }
-            this.monitoringEnd(loopName);
         };
         setInterval(animate, this.intervalMs);
     }

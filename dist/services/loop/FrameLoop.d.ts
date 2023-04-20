@@ -8,11 +8,7 @@ export declare class FrameLoop {
     };
     start(): void;
     enablePerfLog(activated: boolean): void;
-    getPerfLog(): {
-        [id: string]: {
-            timeMs: number;
-        };
-    };
+    onPerfLog(minimumRefreshInterval: number, callback: (label: string, time: number, duration: number, minTime: number, maxTime: number, sampleNumber: number, totalTimeMs: number) => void): () => void;
     addLoop(loopName: string, iterationCallback: (delta: number) => void, loopType?: string): () => void;
 }
 //# sourceMappingURL=FrameLoop.d.ts.map

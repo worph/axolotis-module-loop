@@ -38,12 +38,20 @@ export class FrameLoop {
         }
     }
 
-    getPerfLog(): { [id: string]: { timeMs: number } } {
-        let ret = {};
+    onPerfLog(minimumRefreshInterval: number, callback: (label: string,
+                                                         time: number,
+                                                         duration: number,
+                                                         minTime: number,
+                                                         maxTime: number,
+                                                         sampleNumber: number,
+                                                         totalTimeMs: number) => void): () => void{
+        let unsubscribe:(()=>void)[] = [];
         for (const loopTypeKey in this.loopType) {
-            ret = {...ret, ...this.loopType[loopTypeKey].getPerfLog()};
+            unsubscribe.push(this.loopType[loopTypeKey].onPerfLog(minimumRefreshInterval,callback));
         }
-        return ret;
+        return () => {
+            unsubscribe.forEach((unsub) => unsub());
+        }
     }
 
     addLoop(loopName: string, iterationCallback: (delta: number) => void, loopType: string = ANIMATION_FRAME_LOOP): () => void {

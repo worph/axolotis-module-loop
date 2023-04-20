@@ -1,9 +1,3 @@
-export interface PerfLogKPI {
-    totalTimeMs: number,
-    meanTimeMs: number,
-    sampleNumber: number
-}
-
 export interface LoopInterface {
     getType(): string;
 
@@ -11,7 +5,13 @@ export interface LoopInterface {
 
     enablePerfLog(activated: boolean);
 
-    getPerfLog(): { [id: string]: PerfLogKPI };
+    onPerfLog(minimumRefreshInterval: number, callback: (label: string,
+                         time: number,
+                         duration: number,
+                         minTime: number,
+                         maxTime: number,
+                         sampleNumber: number,
+                         totalTimeMs: number) => void): () => void;
 
     removeLoop(loopName: string);
 

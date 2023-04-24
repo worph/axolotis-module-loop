@@ -1,9 +1,10 @@
+import { TimeLogger } from "../perf/TimeLogger";
 import { LoopInterface } from "./LoopInterface";
-import { PerfLog } from "./PerfLog";
-export declare class AnimationFrameLoop extends PerfLog implements LoopInterface {
+export declare class AnimationFrameLoop implements LoopInterface {
+    private timeLogger;
     private type;
     getType(): string;
-    constructor(type?: string);
+    constructor(timeLogger: TimeLogger, type?: string);
     loops: {
         [id: string]: {
             loopName: string;

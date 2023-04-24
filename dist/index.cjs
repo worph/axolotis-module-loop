@@ -24,6 +24,16 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var __decorateClass = (decorators, target, key, kind) => {
+  var result = kind > 1 ? void 0 : kind ? __getOwnPropDesc(target, key) : target;
+  for (var i = decorators.length - 1, decorator; i >= 0; i--)
+    if (decorator = decorators[i])
+      result = (kind ? decorator(target, key, result) : decorator(result)) || result;
+  if (kind && result)
+    __defProp(target, key, result);
+  return result;
+};
+var __decorateParam = (index, decorator) => (target, key) => decorator(target, key, index);
 
 // ../../node_modules/inversify/lib/constants/metadata_keys.js
 var require_metadata_keys = __commonJS({
@@ -862,8 +872,8 @@ var require_reflection_utils = __commonJS({
       }
       return targets;
     }
-    function _getServiceIdentifierForProperty(inject, multiInject, propertyName, className) {
-      var serviceIdentifier = inject || multiInject;
+    function _getServiceIdentifierForProperty(inject3, multiInject, propertyName, className) {
+      var serviceIdentifier = inject3 || multiInject;
       if (serviceIdentifier === void 0) {
         var msg = ERROR_MSGS.MISSING_INJECTABLE_ANNOTATION + " for property " + String(propertyName) + " in class " + className + ".";
         throw new Error(msg);
@@ -3837,7 +3847,7 @@ var require_injectable = __commonJS({
     exports.injectable = void 0;
     var ERRORS_MSGS = __importStar(require_error_msgs());
     var METADATA_KEY = __importStar(require_metadata_keys());
-    function injectable() {
+    function injectable4() {
       return function(target) {
         if (Reflect.hasOwnMetadata(METADATA_KEY.PARAM_TYPES, target)) {
           throw new Error(ERRORS_MSGS.DUPLICATED_INJECTABLE_DECORATOR);
@@ -3847,7 +3857,7 @@ var require_injectable = __commonJS({
         return target;
       };
     }
-    exports.injectable = injectable;
+    exports.injectable = injectable4;
   }
 });
 
@@ -3970,8 +3980,8 @@ var require_inject = __commonJS({
     exports.inject = void 0;
     var METADATA_KEY = __importStar(require_metadata_keys());
     var inject_base_1 = require_inject_base();
-    var inject = (0, inject_base_1.injectBase)(METADATA_KEY.INJECT_TAG);
-    exports.inject = inject;
+    var inject3 = (0, inject_base_1.injectBase)(METADATA_KEY.INJECT_TAG);
+    exports.inject = inject3;
   }
 });
 
@@ -4424,92 +4434,27 @@ var src_exports = {};
 __export(src_exports, {
   ANIMATION_FRAME_LOOP: () => ANIMATION_FRAME_LOOP,
   AnimationFrameLoop: () => AnimationFrameLoop,
+  AnimationFrameLoopName: () => AnimationFrameLoopName,
   AxLoopModule: () => AxLoopModule,
   FrameLoop: () => FrameLoop,
   FrameLoopName: () => FrameLoopName,
   INTERVAL_SET_1S: () => INTERVAL_SET_1S,
-  PerfLog: () => PerfLog,
-  SetIntervalLoop: () => SetIntervalLoop
+  SetIntervalLoop: () => SetIntervalLoop,
+  SetIntervalLoopName: () => SetIntervalLoopName,
+  TimeLogger: () => TimeLogger,
+  TimeLoggerName: () => TimeLoggerName
 });
 module.exports = __toCommonJS(src_exports);
-var import_inversify2 = __toESM(require_inversify(), 1);
+var import_inversify5 = __toESM(require_inversify(), 1);
 
 // src/Identifier.ts
 var FrameLoopName = Symbol.for("FrameLoopName");
+var AnimationFrameLoopName = Symbol.for("AnimationFrameLoopName");
+var SetIntervalLoopName = Symbol.for("SetIntervalLoopName");
+var TimeLoggerName = Symbol.for("TimeLoggerName");
 
-// src/services/loop/PerfLog.ts
-var PerfLog = class {
-  monitoringStart = () => {
-  };
-  monitoringEnd = () => {
-  };
-  callbacks = [];
-  loopData = {};
-  onPerfLog(minimumRefreshInterval, callback) {
-    this.callbacks.push({
-      refreshInterval: minimumRefreshInterval,
-      last: 0,
-      cb: callback
-    });
-    this.enablePerfLog(true);
-    return () => {
-      this.callbacks = this.callbacks.filter((cb) => cb.cb !== callback);
-    };
-  }
-  enablePerfLog(activated) {
-    if (activated) {
-      this.monitoringStart = (loopName) => {
-        let loopDatum = this.loopData[loopName];
-        if (!loopDatum) {
-          loopDatum = {
-            minTimeMs: 0,
-            maxTimeMs: 0,
-            totalTimeMs: 0,
-            sampleNumber: 0,
-            meanTimeMs: 0,
-            start: 0
-          };
-          this.loopData[loopName] = loopDatum;
-        }
-        loopDatum.start = performance.now();
-      };
-      this.monitoringEnd = (loopName) => {
-        let loopDatum = this.loopData[loopName];
-        const nowTime = performance.now();
-        let time = nowTime - loopDatum.start;
-        for (let cb of this.callbacks) {
-          loopDatum.totalTimeMs += time;
-          loopDatum.sampleNumber++;
-          loopDatum.meanTimeMs = loopDatum.totalTimeMs / loopDatum.sampleNumber;
-          loopDatum.maxTimeMs = Math.max(loopDatum.maxTimeMs, time);
-          loopDatum.minTimeMs = Math.min(loopDatum.minTimeMs, time);
-          if (nowTime - cb.last > cb.refreshInterval) {
-            cb.cb(
-              loopName,
-              performance.timeOrigin + nowTime,
-              loopDatum.meanTimeMs,
-              loopDatum.minTimeMs,
-              loopDatum.maxTimeMs,
-              loopDatum.sampleNumber,
-              loopDatum.totalTimeMs
-            );
-            cb.last = nowTime;
-            loopDatum.totalTimeMs = 0;
-            loopDatum.sampleNumber = 0;
-            loopDatum.meanTimeMs = 0;
-            loopDatum.minTimeMs = Number.MAX_VALUE;
-            loopDatum.maxTimeMs = Number.MIN_VALUE;
-          }
-        }
-      };
-    } else {
-      this.monitoringStart = () => {
-      };
-      this.monitoringEnd = () => {
-      };
-    }
-  }
-};
+// src/services/loop/AnimationFrameLoop.ts
+var import_inversify2 = __toESM(require_inversify(), 1);
 
 // ../axolotis-module-id-generator/dist/index.mjs
 var __create2 = Object.create;
@@ -5339,8 +5284,8 @@ var require_reflection_utils2 = __commonJS2({
       }
       return targets;
     }
-    function _getServiceIdentifierForProperty(inject, multiInject, propertyName, className) {
-      var serviceIdentifier = inject || multiInject;
+    function _getServiceIdentifierForProperty(inject3, multiInject, propertyName, className) {
+      var serviceIdentifier = inject3 || multiInject;
       if (serviceIdentifier === void 0) {
         var msg = ERROR_MSGS.MISSING_INJECTABLE_ANNOTATION + " for property " + String(propertyName) + " in class " + className + ".";
         throw new Error(msg);
@@ -8266,7 +8211,7 @@ var require_injectable2 = __commonJS2({
     exports.injectable = void 0;
     var ERRORS_MSGS = __importStar(require_error_msgs2());
     var METADATA_KEY = __importStar(require_metadata_keys2());
-    function injectable() {
+    function injectable4() {
       return function(target) {
         if (Reflect.hasOwnMetadata(METADATA_KEY.PARAM_TYPES, target)) {
           throw new Error(ERRORS_MSGS.DUPLICATED_INJECTABLE_DECORATOR);
@@ -8276,7 +8221,7 @@ var require_injectable2 = __commonJS2({
         return target;
       };
     }
-    exports.injectable = injectable;
+    exports.injectable = injectable4;
   }
 });
 var require_tagged2 = __commonJS2({
@@ -8391,8 +8336,8 @@ var require_inject2 = __commonJS2({
     exports.inject = void 0;
     var METADATA_KEY = __importStar(require_metadata_keys2());
     var inject_base_1 = require_inject_base2();
-    var inject = (0, inject_base_1.injectBase)(METADATA_KEY.INJECT_TAG);
-    exports.inject = inject;
+    var inject3 = (0, inject_base_1.injectBase)(METADATA_KEY.INJECT_TAG);
+    exports.inject = inject3;
   }
 });
 var require_optional2 = __commonJS2({
@@ -8834,9 +8779,9 @@ function makeid(length) {
 }
 
 // src/services/loop/AnimationFrameLoop.ts
-var AnimationFrameLoop = class extends PerfLog {
-  constructor(type = AnimationFrameLoop.name) {
-    super();
+var AnimationFrameLoop = class {
+  constructor(timeLogger, type = AnimationFrameLoop.name) {
+    this.timeLogger = timeLogger;
     this.type = type;
   }
   getType() {
@@ -8851,17 +8796,17 @@ var AnimationFrameLoop = class extends PerfLog {
       this.prevTime = t;
       requestAnimationFrame(animate);
       for (const callback in this.loops) {
-        this.monitoringStart(this.loops[callback].loopName);
+        this.timeLogger.monitoringStart(this.loops[callback].loopName);
         this.loops[callback].iterationCallback(delta);
-        this.monitoringEnd(this.loops[callback].loopName);
+        this.timeLogger.monitoringEnd(this.loops[callback].loopName);
       }
     };
     requestAnimationFrame(animate);
   }
   removeLoop(loopName) {
     delete this.loops[loopName];
-    this.monitoringStart(loopName);
-    this.monitoringEnd(loopName);
+    this.timeLogger.monitoringStart(loopName);
+    this.timeLogger.monitoringEnd(loopName);
   }
   addLoop(loopName, iterationCallback) {
     let instanceName = loopName + "-" + makeid(5);
@@ -8874,35 +8819,60 @@ var AnimationFrameLoop = class extends PerfLog {
     };
   }
 };
+AnimationFrameLoop = __decorateClass([
+  (0, import_inversify2.injectable)(),
+  __decorateParam(0, (0, import_inversify2.inject)(TimeLoggerName))
+], AnimationFrameLoop);
+
+// src/services/loop/FrameLoop.ts
+var import_inversify3 = __toESM(require_inversify(), 1);
+var ANIMATION_FRAME_LOOP = "ANIMATION_FRAME_LOOP";
+var INTERVAL_SET_1S = "INTERVAL_SET_1S";
+var FrameLoop = class {
+  constructor(animationFrameLoop, setIntervalLoop) {
+    this.loopType[ANIMATION_FRAME_LOOP] = animationFrameLoop;
+    this.loopType[INTERVAL_SET_1S] = setIntervalLoop(1e3);
+  }
+  loopType = {};
+  start() {
+    for (const loopTypeKey in this.loopType) {
+      this.loopType[loopTypeKey].start();
+    }
+  }
+  addLoop(loopName, iterationCallback, loopType = ANIMATION_FRAME_LOOP) {
+    return this.loopType[loopType].addLoop(loopName, iterationCallback);
+  }
+};
+FrameLoop = __decorateClass([
+  (0, import_inversify3.injectable)(),
+  __decorateParam(0, (0, import_inversify3.inject)(AnimationFrameLoopName)),
+  __decorateParam(1, (0, import_inversify3.inject)(SetIntervalLoopName))
+], FrameLoop);
 
 // src/services/loop/SetIntervalLoop.ts
-var SetIntervalLoop = class extends PerfLog {
-  constructor(intervalMs, type = SetIntervalLoop.name) {
-    super();
+var SetIntervalLoop = class {
+  constructor(timeLogger, intervalMs) {
+    this.timeLogger = timeLogger;
     this.intervalMs = intervalMs;
-    this.type = type;
   }
   loops = {};
   prevTime = 0;
-  getType() {
-    return this.type;
-  }
   start() {
     const animate = (t) => {
       const delta = t - this.prevTime;
       this.prevTime = t;
       for (const callbackKey in this.loops) {
-        this.monitoringStart(this.loops[callbackKey].loopName);
+        this.timeLogger.monitoringStart(this.loops[callbackKey].loopName);
         this.loops[callbackKey].iterationCallback(delta);
-        this.monitoringEnd(this.loops[callbackKey].loopName);
+        this.timeLogger.monitoringEnd(this.loops[callbackKey].loopName);
       }
     };
     setInterval(animate, this.intervalMs);
   }
   removeLoop(loopName) {
     delete this.loops[loopName];
-    this.monitoringStart(loopName);
-    this.monitoringEnd(loopName);
+    this.timeLogger.monitoringStart(loopName);
+    this.timeLogger.monitoringEnd(loopName);
   }
   addLoop(loopName, iterationCallback) {
     let instanceName = loopName;
@@ -8919,46 +8889,98 @@ var SetIntervalLoop = class extends PerfLog {
   }
 };
 
-// src/services/loop/FrameLoop.ts
-var ANIMATION_FRAME_LOOP = "ANIMATION_FRAME_LOOP";
-var INTERVAL_SET_1S = "INTERVAL_SET_1S";
-var FrameLoop = class {
-  constructor() {
-    this.loopType[ANIMATION_FRAME_LOOP] = new AnimationFrameLoop(ANIMATION_FRAME_LOOP);
-    this.loopType[INTERVAL_SET_1S] = new SetIntervalLoop(1e3, INTERVAL_SET_1S);
-  }
-  loopType = {};
-  start() {
-    for (const loopTypeKey in this.loopType) {
-      this.loopType[loopTypeKey].start();
-    }
-  }
-  enablePerfLog(activated) {
-    for (const loopTypeKey in this.loopType) {
-      this.loopType[loopTypeKey].enablePerfLog(activated);
-    }
-  }
+// src/services/perf/TimeLogger.ts
+var import_inversify4 = __toESM(require_inversify(), 1);
+var TimeLogger = class {
+  monitoringStart = () => {
+  };
+  monitoringEnd = () => {
+  };
+  callbacks = [];
+  loopData = {};
   onPerfLog(minimumRefreshInterval, callback) {
-    let unsubscribe = [];
-    for (const loopTypeKey in this.loopType) {
-      unsubscribe.push(this.loopType[loopTypeKey].onPerfLog(minimumRefreshInterval, callback));
-    }
+    this.callbacks.push({
+      refreshInterval: minimumRefreshInterval,
+      cb: callback
+    });
+    this.enablePerfLog(true);
     return () => {
-      unsubscribe.forEach((unsub) => unsub());
+      this.callbacks = this.callbacks.filter((cb) => cb.cb !== callback);
     };
   }
-  addLoop(loopName, iterationCallback, loopType = ANIMATION_FRAME_LOOP) {
-    return this.loopType[loopType].addLoop(loopName, iterationCallback);
+  enablePerfLog(activated) {
+    if (activated) {
+      this.monitoringStart = (loopName) => {
+        let loopDatum = this.loopData[loopName];
+        if (!loopDatum) {
+          loopDatum = {
+            minTimeMs: 0,
+            maxTimeMs: 0,
+            totalTimeMs: 0,
+            sampleNumber: 0,
+            meanTimeMs: 0,
+            start: 0,
+            last: 0
+          };
+          this.loopData[loopName] = loopDatum;
+        }
+        loopDatum.start = performance.now();
+      };
+      this.monitoringEnd = (loopName) => {
+        let loopDatum = this.loopData[loopName];
+        const nowTime = performance.now();
+        let time = nowTime - loopDatum.start;
+        for (let cb of this.callbacks) {
+          loopDatum.totalTimeMs += time;
+          loopDatum.sampleNumber++;
+          loopDatum.meanTimeMs = loopDatum.totalTimeMs / loopDatum.sampleNumber;
+          loopDatum.maxTimeMs = Math.max(loopDatum.maxTimeMs, time);
+          loopDatum.minTimeMs = Math.min(loopDatum.minTimeMs, time);
+          if (nowTime - loopDatum.last > cb.refreshInterval) {
+            cb.cb(
+              loopName,
+              performance.timeOrigin + nowTime,
+              loopDatum.meanTimeMs,
+              loopDatum.minTimeMs,
+              loopDatum.maxTimeMs,
+              loopDatum.sampleNumber,
+              loopDatum.totalTimeMs
+            );
+            loopDatum.last = nowTime;
+            loopDatum.last = 0;
+            loopDatum.totalTimeMs = 0;
+            loopDatum.sampleNumber = 0;
+            loopDatum.meanTimeMs = 0;
+            loopDatum.minTimeMs = Number.MAX_VALUE;
+            loopDatum.maxTimeMs = Number.MIN_VALUE;
+          }
+        }
+      };
+    } else {
+      this.monitoringStart = () => {
+      };
+      this.monitoringEnd = () => {
+      };
+    }
   }
 };
+TimeLogger = __decorateClass([
+  (0, import_inversify4.injectable)()
+], TimeLogger);
 
 // src/index.ts
 var AxLoopModule = class {
   getModule() {
-    return new import_inversify2.ContainerModule((bind) => {
-      bind(FrameLoopName).toDynamicValue(() => {
-        return new FrameLoop();
-      }).inSingletonScope();
+    return new import_inversify5.ContainerModule((bind) => {
+      bind(FrameLoopName).to(FrameLoop).inSingletonScope();
+      bind(AnimationFrameLoopName).to(AnimationFrameLoop).inSingletonScope();
+      bind(TimeLoggerName).to(TimeLogger).inSingletonScope();
+      bind(SetIntervalLoopName).toFactory((context) => {
+        return (time) => {
+          let timeLogger = context.container.get(TimeLoggerName);
+          return new SetIntervalLoop(timeLogger, time);
+        };
+      });
     });
   }
 };
@@ -8966,11 +8988,14 @@ var AxLoopModule = class {
 0 && (module.exports = {
   ANIMATION_FRAME_LOOP,
   AnimationFrameLoop,
+  AnimationFrameLoopName,
   AxLoopModule,
   FrameLoop,
   FrameLoopName,
   INTERVAL_SET_1S,
-  PerfLog,
-  SetIntervalLoop
+  SetIntervalLoop,
+  SetIntervalLoopName,
+  TimeLogger,
+  TimeLoggerName
 });
 //# sourceMappingURL=index.cjs.map

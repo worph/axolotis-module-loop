@@ -1,3 +1,5 @@
+import {inject, injectable} from "inversify";
+import {AnimationFrameLoopName, SetIntervalLoopName} from "../../Identifier";
 import {AnimationFrameLoop} from "./AnimationFrameLoop";
 import {LoopInterface} from "./LoopInterface";
 import {SetIntervalLoop} from "./SetIntervalLoop";
@@ -5,6 +7,8 @@ import {SetIntervalLoop} from "./SetIntervalLoop";
 export const ANIMATION_FRAME_LOOP = "ANIMATION_FRAME_LOOP";
 export const INTERVAL_SET_1S = "INTERVAL_SET_1S";
 
+//Kind of global loop control? maybe deprecated
+@injectable()
 export class FrameLoop {
     //TODO frame loop
     // setInterval Frameloop
@@ -17,9 +21,12 @@ export class FrameLoop {
     //callbacks:((delta:number)=>void)[] = [];
 
 
-    constructor() {
-        this.loopType[ANIMATION_FRAME_LOOP] = new AnimationFrameLoop(ANIMATION_FRAME_LOOP);
-        this.loopType[INTERVAL_SET_1S] = new SetIntervalLoop(1000, INTERVAL_SET_1S);
+    constructor(
+        @inject(AnimationFrameLoopName) animationFrameLoop:AnimationFrameLoop,
+        @inject(SetIntervalLoopName) setIntervalLoop: (time: number) => SetIntervalLoop
+    ) {
+        this.loopType[ANIMATION_FRAME_LOOP] = animationFrameLoop;
+        this.loopType[INTERVAL_SET_1S] = setIntervalLoop(1000);
     }
 
     loopType: { [id: string]: LoopInterface } = {};
@@ -28,29 +35,6 @@ export class FrameLoop {
     start() {
         for (const loopTypeKey in this.loopType) {
             this.loopType[loopTypeKey].start();
-        }
-    }
-
-
-    enablePerfLog(activated: boolean) {
-        for (const loopTypeKey in this.loopType) {
-            this.loopType[loopTypeKey].enablePerfLog(activated);
-        }
-    }
-
-    onPerfLog(minimumRefreshInterval: number, callback: (label: string,
-                                                         time: number,
-                                                         duration: number,
-                                                         minTime: number,
-                                                         maxTime: number,
-                                                         sampleNumber: number,
-                                                         totalTimeMs: number) => void): () => void{
-        let unsubscribe:(()=>void)[] = [];
-        for (const loopTypeKey in this.loopType) {
-            unsubscribe.push(this.loopType[loopTypeKey].onPerfLog(minimumRefreshInterval,callback));
-        }
-        return () => {
-            unsubscribe.forEach((unsub) => unsub());
         }
     }
 

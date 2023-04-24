@@ -1,12 +1,15 @@
-export class PerfLog {
-    protected monitoringStart: (name) => void = () => {
+import {injectable} from "inversify";
+
+@injectable()
+export class TimeLogger{
+
+    public monitoringStart: (name) => void = () => {
     };
-    protected monitoringEnd: (name) => void = () => {
+    public monitoringEnd: (name) => void = () => {
     };
 
     callbacks: ({
         refreshInterval: number,
-        last: number,
         cb: (label: string, time: number, duration: number, minTime: number, maxTime: number,
              sampleNumber: number,
              totalTimeMs: number) => void
@@ -14,6 +17,7 @@ export class PerfLog {
         )[] = [];
 
     loopData: Record<string, {
+        last: number;
         start: number;
         minTimeMs: number, maxTimeMs: number, totalTimeMs: number, sampleNumber: number, meanTimeMs: number
     }> = {};
@@ -29,7 +33,6 @@ export class PerfLog {
     ) => void): () => void {
         this.callbacks.push({
             refreshInterval: minimumRefreshInterval,
-            last: 0,
             cb: callback
         });
         this.enablePerfLog(true);
@@ -49,7 +52,8 @@ export class PerfLog {
                         totalTimeMs: 0,
                         sampleNumber: 0,
                         meanTimeMs: 0,
-                        start: 0
+                        start: 0,
+                        last: 0,
                     };
                     this.loopData[loopName] = loopDatum;
                 }
@@ -67,14 +71,15 @@ export class PerfLog {
                     loopDatum.maxTimeMs = Math.max(loopDatum.maxTimeMs, time);
                     loopDatum.minTimeMs = Math.min(loopDatum.minTimeMs, time);
                     //if refresh ok notify
-                    if (nowTime - cb.last > cb.refreshInterval) {
+                    if (nowTime - loopDatum.last > cb.refreshInterval) {
                         cb.cb(loopName, performance.timeOrigin + nowTime,
                             loopDatum.meanTimeMs,
                             loopDatum.minTimeMs,
                             loopDatum.maxTimeMs,
                             loopDatum.sampleNumber,
                             loopDatum.totalTimeMs);
-                        cb.last = nowTime;
+                        loopDatum.last = nowTime;
+                        loopDatum.last = 0;
                         loopDatum.totalTimeMs = 0;
                         loopDatum.sampleNumber = 0;
                         loopDatum.meanTimeMs = 0;
@@ -90,5 +95,4 @@ export class PerfLog {
             }
         }
     }
-
 }

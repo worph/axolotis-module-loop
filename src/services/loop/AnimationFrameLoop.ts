@@ -1,14 +1,17 @@
+import {inject, injectable} from "inversify";
+import {TimeLoggerName} from "../../Identifier";
+import {TimeLogger} from "../perf/TimeLogger";
 import {LoopInterface} from "./LoopInterface";
-import {PerfLog} from "./PerfLog";
 import {makeid} from "@aptero/axolotis-module-id-generator";
 
-export class AnimationFrameLoop extends PerfLog implements LoopInterface {
+@injectable()
+export class AnimationFrameLoop implements LoopInterface {
     getType(): string {
         return this.type;
     }
 
-    constructor(private type: string = AnimationFrameLoop.name) {
-        super();
+    constructor(@inject(TimeLoggerName) private timeLogger:TimeLogger,private type: string = AnimationFrameLoop.name) {
+
     }
 
     loops: { [id: string]: { loopName: string, iterationCallback: (delta: number) => void } } = {};
@@ -21,9 +24,9 @@ export class AnimationFrameLoop extends PerfLog implements LoopInterface {
             this.prevTime = t;
             requestAnimationFrame(animate);
             for (const callback in this.loops) {
-                this.monitoringStart(this.loops[callback].loopName);
+                this.timeLogger.monitoringStart(this.loops[callback].loopName);
                 this.loops[callback].iterationCallback(delta);
-                this.monitoringEnd(this.loops[callback].loopName);
+                this.timeLogger.monitoringEnd(this.loops[callback].loopName);
             }
         };
         requestAnimationFrame(animate);
@@ -31,8 +34,8 @@ export class AnimationFrameLoop extends PerfLog implements LoopInterface {
 
     removeLoop(loopName: string) {
         delete this.loops[loopName];
-        this.monitoringStart(loopName); //set this loop to 0 fix
-        this.monitoringEnd(loopName);
+        this.timeLogger.monitoringStart(loopName); //set this loop to 0 fix
+        this.timeLogger.monitoringEnd(loopName);
     }
 
     addLoop(loopName: string, iterationCallback: (delta: number) => void): () => void {

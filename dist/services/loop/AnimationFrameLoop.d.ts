@@ -1,4 +1,4 @@
-import { TimeLogger } from "../perf/TimeLogger";
+import { TimeLogger, TimeLoggerInterface } from "../perf/TimeLogger";
 import { LoopInterface } from "./LoopInterface";
 export declare class AnimationFrameLoop implements LoopInterface {
     private timeLogger;
@@ -6,12 +6,10 @@ export declare class AnimationFrameLoop implements LoopInterface {
     getType(): string;
     constructor(timeLogger: TimeLogger, type?: string);
     loops: {
-        [id: string]: {
-            loopName: string;
-            iterationCallback: (delta: number) => void;
-        };
-    };
-    private prevTime;
+        loopName: string;
+        iterationCallback: (delta: number) => void;
+        timeLogger: TimeLoggerInterface;
+    }[];
     start(): void;
     removeLoop(loopName: string): void;
     addLoop(loopName: string, iterationCallback: (delta: number) => void): () => void;

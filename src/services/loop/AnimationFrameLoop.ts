@@ -1,6 +1,6 @@
 import {inject, injectable} from "inversify";
 import {TimeLoggerName} from "../../Identifier";
-import {TimeLogger} from "../perf/TimeLogger";
+import {TimeLogger, TimeLoggerInterface} from "../perf/TimeLogger";
 import {LoopInterface} from "./LoopInterface";
 import {makeid} from "@aptero/axolotis-module-id-generator";
 
@@ -14,36 +14,44 @@ export class AnimationFrameLoop implements LoopInterface {
 
     }
 
-    loops: { [id: string]: { loopName: string, iterationCallback: (delta: number) => void } } = {};
-    private prevTime: number = 0;
+    loops: {
+        loopName: string, iterationCallback: (delta: number) => void, timeLogger: TimeLoggerInterface
+    }[] = [];
 
     start() {
-        let type = this.getType();
+        let prevTime: number = 0;
         const animate = (t) => {
-            const delta = t - this.prevTime;
-            this.prevTime = t;
+            const delta = t - prevTime;
+            prevTime = t;
             requestAnimationFrame(animate);
-            for (const callback in this.loops) {
-                this.timeLogger.monitoringStart(this.loops[callback].loopName);
-                this.loops[callback].iterationCallback(delta);
-                this.timeLogger.monitoringEnd(this.loops[callback].loopName);
+            for (const loop of this.loops) {
+                loop.timeLogger.monitoringStart();
+                loop.iterationCallback(delta);
+                loop.timeLogger.monitoringEnd();
             }
         };
         requestAnimationFrame(animate);
     }
 
     removeLoop(loopName: string) {
-        delete this.loops[loopName];
-        this.timeLogger.monitoringStart(loopName); //set this loop to 0 fix
-        this.timeLogger.monitoringEnd(loopName);
+        this.loops.filter((loop) => {
+            if(loop.loopName === loopName){
+                loop.timeLogger.monitoringStart(); //set this loop to 0 fix
+                loop.timeLogger.monitoringEnd();
+                return false;
+            }else {
+                return true;
+            }
+        });
     }
 
     addLoop(loopName: string, iterationCallback: (delta: number) => void): () => void {
         let instanceName = loopName + "-" + makeid(5);//ensure uniqueness of loop
-        this.loops[instanceName] = {
+        this.loops.push({
             loopName,
-            iterationCallback
-        };
+            iterationCallback,
+            timeLogger : this.timeLogger.getTimeLogger(loopName)
+        });
         return () => {
             this.removeLoop(loopName);
         }

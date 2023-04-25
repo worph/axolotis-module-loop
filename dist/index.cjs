@@ -8787,33 +8787,39 @@ var AnimationFrameLoop = class {
   getType() {
     return this.type;
   }
-  loops = {};
-  prevTime = 0;
+  loops = [];
   start() {
-    let type = this.getType();
+    let prevTime = 0;
     const animate = (t) => {
-      const delta = t - this.prevTime;
-      this.prevTime = t;
+      const delta = t - prevTime;
+      prevTime = t;
       requestAnimationFrame(animate);
-      for (const callback in this.loops) {
-        this.timeLogger.monitoringStart(this.loops[callback].loopName);
-        this.loops[callback].iterationCallback(delta);
-        this.timeLogger.monitoringEnd(this.loops[callback].loopName);
+      for (const loop of this.loops) {
+        loop.timeLogger.monitoringStart();
+        loop.iterationCallback(delta);
+        loop.timeLogger.monitoringEnd();
       }
     };
     requestAnimationFrame(animate);
   }
   removeLoop(loopName) {
-    delete this.loops[loopName];
-    this.timeLogger.monitoringStart(loopName);
-    this.timeLogger.monitoringEnd(loopName);
+    this.loops.filter((loop) => {
+      if (loop.loopName === loopName) {
+        loop.timeLogger.monitoringStart();
+        loop.timeLogger.monitoringEnd();
+        return false;
+      } else {
+        return true;
+      }
+    });
   }
   addLoop(loopName, iterationCallback) {
     let instanceName = loopName + "-" + makeid(5);
-    this.loops[instanceName] = {
+    this.loops.push({
       loopName,
-      iterationCallback
-    };
+      iterationCallback,
+      timeLogger: this.timeLogger.getTimeLogger(loopName)
+    });
     return () => {
       this.removeLoop(loopName);
     };
@@ -8855,34 +8861,38 @@ var SetIntervalLoop = class {
     this.timeLogger = timeLogger;
     this.intervalMs = intervalMs;
   }
-  loops = {};
-  prevTime = 0;
+  loops = [];
   start() {
+    let prevTime = 0;
     const animate = (t) => {
-      const delta = t - this.prevTime;
-      this.prevTime = t;
-      for (const callbackKey in this.loops) {
-        this.timeLogger.monitoringStart(this.loops[callbackKey].loopName);
-        this.loops[callbackKey].iterationCallback(delta);
-        this.timeLogger.monitoringEnd(this.loops[callbackKey].loopName);
+      const delta = t - prevTime;
+      prevTime = t;
+      for (const loop of this.loops) {
+        loop.timeLogger.monitoringStart();
+        loop.iterationCallback(delta);
+        loop.timeLogger.monitoringEnd();
       }
     };
     setInterval(animate, this.intervalMs);
   }
   removeLoop(loopName) {
-    delete this.loops[loopName];
-    this.timeLogger.monitoringStart(loopName);
-    this.timeLogger.monitoringEnd(loopName);
+    this.loops.filter((loop) => {
+      if (loop.loopName === loopName) {
+        loop.timeLogger.monitoringStart();
+        loop.timeLogger.monitoringEnd();
+        return false;
+      } else {
+        return true;
+      }
+    });
   }
   addLoop(loopName, iterationCallback) {
-    let instanceName = loopName;
-    if (this.loops[instanceName]) {
-      instanceName = loopName + "-" + makeid(5);
-    }
-    this.loops[instanceName] = {
+    let instanceName = loopName + "-" + makeid(5);
+    this.loops.push({
       loopName,
-      iterationCallback
-    };
+      iterationCallback,
+      timeLogger: this.timeLogger.getTimeLogger(loopName)
+    });
     return () => {
       this.removeLoop(loopName);
     };
@@ -8892,12 +8902,46 @@ var SetIntervalLoop = class {
 // src/services/perf/TimeLogger.ts
 var import_inversify4 = __toESM(require_inversify(), 1);
 var TimeLogger = class {
-  monitoringStart = () => {
-  };
-  monitoringEnd = () => {
-  };
+  getTimeLogger(name) {
+    let minTimeMs = 0, maxTimeMs = 0, totalTimeMs = 0, sampleNumber = 0, meanTimeMs = 0, start = 0, last = 0;
+    let callbacks1 = this.callbacks;
+    return {
+      monitoringStart: () => {
+        start = performance.now();
+      },
+      monitoringEnd: () => {
+        const nowTime = performance.now();
+        const time = nowTime - start;
+        totalTimeMs += time;
+        sampleNumber++;
+        meanTimeMs = totalTimeMs / sampleNumber;
+        maxTimeMs = Math.max(maxTimeMs, time);
+        minTimeMs = Math.min(minTimeMs, time);
+        for (const cb of callbacks1) {
+          if (nowTime - last > cb.refreshInterval) {
+            (async () => {
+              cb.cb(
+                name,
+                performance.timeOrigin + nowTime,
+                meanTimeMs,
+                minTimeMs,
+                maxTimeMs,
+                sampleNumber,
+                totalTimeMs
+              );
+            })();
+            last = nowTime;
+            totalTimeMs = 0;
+            sampleNumber = 0;
+            meanTimeMs = 0;
+            minTimeMs = Number.MAX_VALUE;
+            maxTimeMs = Number.MIN_VALUE;
+          }
+        }
+      }
+    };
+  }
   callbacks = [];
-  loopData = {};
   onPerfLog(minimumRefreshInterval, callback) {
     this.callbacks.push({
       refreshInterval: minimumRefreshInterval,
@@ -8909,59 +8953,6 @@ var TimeLogger = class {
     };
   }
   enablePerfLog(activated) {
-    if (activated) {
-      this.monitoringStart = (loopName) => {
-        let loopDatum = this.loopData[loopName];
-        if (!loopDatum) {
-          loopDatum = {
-            minTimeMs: 0,
-            maxTimeMs: 0,
-            totalTimeMs: 0,
-            sampleNumber: 0,
-            meanTimeMs: 0,
-            start: 0,
-            last: 0
-          };
-          this.loopData[loopName] = loopDatum;
-        }
-        loopDatum.start = performance.now();
-      };
-      this.monitoringEnd = (loopName) => {
-        let loopDatum = this.loopData[loopName];
-        const nowTime = performance.now();
-        let time = nowTime - loopDatum.start;
-        for (let cb of this.callbacks) {
-          loopDatum.totalTimeMs += time;
-          loopDatum.sampleNumber++;
-          loopDatum.meanTimeMs = loopDatum.totalTimeMs / loopDatum.sampleNumber;
-          loopDatum.maxTimeMs = Math.max(loopDatum.maxTimeMs, time);
-          loopDatum.minTimeMs = Math.min(loopDatum.minTimeMs, time);
-          if (nowTime - loopDatum.last > cb.refreshInterval) {
-            cb.cb(
-              loopName,
-              performance.timeOrigin + nowTime,
-              loopDatum.meanTimeMs,
-              loopDatum.minTimeMs,
-              loopDatum.maxTimeMs,
-              loopDatum.sampleNumber,
-              loopDatum.totalTimeMs
-            );
-            loopDatum.last = nowTime;
-            loopDatum.last = 0;
-            loopDatum.totalTimeMs = 0;
-            loopDatum.sampleNumber = 0;
-            loopDatum.meanTimeMs = 0;
-            loopDatum.minTimeMs = Number.MAX_VALUE;
-            loopDatum.maxTimeMs = Number.MIN_VALUE;
-          }
-        }
-      };
-    } else {
-      this.monitoringStart = () => {
-      };
-      this.monitoringEnd = () => {
-      };
-    }
   }
 };
 TimeLogger = __decorateClass([

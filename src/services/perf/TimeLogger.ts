@@ -1,26 +1,65 @@
 import {injectable} from "inversify";
 
-@injectable()
-export class TimeLogger{
+export interface TimeLoggerInterface {
+    monitoringStart: () => void,
+    monitoringEnd: () => void
+}
 
-    public monitoringStart: (name) => void = () => {
-    };
-    public monitoringEnd: (name) => void = () => {
-    };
+@injectable()
+export class TimeLogger {
+
+    getTimeLogger(name: string): TimeLoggerInterface {
+        let minTimeMs = 0,
+            maxTimeMs = 0,
+            totalTimeMs = 0,
+            sampleNumber = 0,
+            meanTimeMs = 0,
+            start = 0,
+            last = 0;
+        let callbacks1 = this.callbacks;
+        return {
+            monitoringStart: () => {
+                start = performance.now();
+            },
+            monitoringEnd: () => {
+                const nowTime = performance.now();
+                const time = nowTime - start;
+                //create a mean
+                totalTimeMs += time;
+                sampleNumber++;
+                meanTimeMs = totalTimeMs / sampleNumber;
+                maxTimeMs = Math.max(maxTimeMs, time);
+                minTimeMs = Math.min(minTimeMs, time);
+                //if refresh ok notify
+                for (const cb of callbacks1) {
+                    if ((nowTime - last) > cb.refreshInterval) {
+                        //avoid blocking the main thread
+                        (async () => {
+                            cb.cb(name, performance.timeOrigin + nowTime,
+                                meanTimeMs,
+                                minTimeMs,
+                                maxTimeMs,
+                                sampleNumber,
+                                totalTimeMs);
+                        })();
+                        last = nowTime;
+                        totalTimeMs = 0;
+                        sampleNumber = 0;
+                        meanTimeMs = 0;
+                        minTimeMs = Number.MAX_VALUE;
+                        maxTimeMs = Number.MIN_VALUE;
+                    }
+                }
+            }
+        }
+    }
 
     callbacks: ({
         refreshInterval: number,
         cb: (label: string, time: number, duration: number, minTime: number, maxTime: number,
              sampleNumber: number,
              totalTimeMs: number) => void
-    }
-        )[] = [];
-
-    loopData: Record<string, {
-        last: number;
-        start: number;
-        minTimeMs: number, maxTimeMs: number, totalTimeMs: number, sampleNumber: number, meanTimeMs: number
-    }> = {};
+    })[] = [];
 
     onPerfLog(minimumRefreshInterval: number, callback: (
         label: string,
@@ -42,57 +81,5 @@ export class TimeLogger{
     }
 
     enablePerfLog(activated: boolean) {
-        if (activated) {
-            this.monitoringStart = (loopName) => {
-                let loopDatum = this.loopData[loopName];
-                if (!loopDatum) {
-                    loopDatum = {
-                        minTimeMs: 0,
-                        maxTimeMs: 0,
-                        totalTimeMs: 0,
-                        sampleNumber: 0,
-                        meanTimeMs: 0,
-                        start: 0,
-                        last: 0,
-                    };
-                    this.loopData[loopName] = loopDatum;
-                }
-                loopDatum.start = performance.now();
-            }
-            this.monitoringEnd = (loopName) => {
-                let loopDatum = this.loopData[loopName];
-                const nowTime = performance.now();
-                let time = nowTime - loopDatum.start;
-                for (let cb of this.callbacks) {
-                    //create a mean
-                    loopDatum.totalTimeMs += time;
-                    loopDatum.sampleNumber++;
-                    loopDatum.meanTimeMs = loopDatum.totalTimeMs / loopDatum.sampleNumber;
-                    loopDatum.maxTimeMs = Math.max(loopDatum.maxTimeMs, time);
-                    loopDatum.minTimeMs = Math.min(loopDatum.minTimeMs, time);
-                    //if refresh ok notify
-                    if (nowTime - loopDatum.last > cb.refreshInterval) {
-                        cb.cb(loopName, performance.timeOrigin + nowTime,
-                            loopDatum.meanTimeMs,
-                            loopDatum.minTimeMs,
-                            loopDatum.maxTimeMs,
-                            loopDatum.sampleNumber,
-                            loopDatum.totalTimeMs);
-                        loopDatum.last = nowTime;
-                        loopDatum.last = 0;
-                        loopDatum.totalTimeMs = 0;
-                        loopDatum.sampleNumber = 0;
-                        loopDatum.meanTimeMs = 0;
-                        loopDatum.minTimeMs = Number.MAX_VALUE;
-                        loopDatum.maxTimeMs = Number.MIN_VALUE;
-                    }
-                }
-            }
-        } else {
-            this.monitoringStart = () => {
-            }
-            this.monitoringEnd = () => {
-            }
-        }
     }
 }

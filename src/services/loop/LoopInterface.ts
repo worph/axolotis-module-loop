@@ -1,7 +1,11 @@
 export interface LoopInterface {
     start(): void;
+    stop(): void;
+}
 
-    removeLoop(loopName: string);
+export type LoopCallback = (delta: number) => void;
 
-    addLoop(loopName: string, iterationCallback: (delta: number) => void): () => void;
+export interface LoopRemoverInterface {
+    loop: LoopInterface;
+    remover: () => void;
 }

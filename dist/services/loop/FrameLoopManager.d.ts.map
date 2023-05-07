@@ -1,0 +1,1 @@
+{"version":3,"file":"FrameLoopManager.d.ts","sourceRoot":"","sources":["../../../src/services/loop/FrameLoopManager.ts"],"names":[],"mappings":"AACA,OAAO,EAAC,aAAa,EAAC,MAAM,iBAAiB,CAAC;AAG9C,qBACa,gBAAgB;;IASzB,KAAK,6BAAoC;IAGzC,KAAK;IAML,IAAI;IAMJ,OAAO,CAAC,IAAI,EAAC,MAAM,EAAC,IAAI,EAAC,aAAa,GAAG,MAAM,IAAI;IAUnD,UAAU,CAAC,IAAI,EAAC,MAAM;CAKzB"}

@@ -2,6 +2,7 @@ export interface TimeLoggerInterface {
     monitoringStart: () => void;
     monitoringEnd: () => void;
 }
+export declare const SUFFIX_DELIMITER = "-";
 export declare class TimeLogger {
     getTimeLogger(name: string): TimeLoggerInterface;
     callbacks: ({

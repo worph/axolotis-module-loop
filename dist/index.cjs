@@ -4438,6 +4438,7 @@ __export(src_exports, {
   AxLoopModule: () => AxLoopModule,
   FrameLoopManager: () => FrameLoopManager,
   FrameLoopManagerName: () => FrameLoopManagerName,
+  SUFFIX_DELIMITER: () => SUFFIX_DELIMITER,
   SetIntervalLoop: () => SetIntervalLoop,
   SetIntervalLoopFactory: () => SetIntervalLoopFactory,
   SetIntervalLoopFactoryName: () => SetIntervalLoopFactoryName,
@@ -4512,15 +4513,18 @@ AnimationFrameLoopFactory = __decorateClass([
 // src/services/loop/FrameLoopManager.ts
 var import_inversify2 = __toESM(require_inversify(), 1);
 var FrameLoopManager = class {
+  started = false;
   constructor() {
   }
   loops = /* @__PURE__ */ new Map();
   start() {
+    this.started = true;
     for (const [key, entry] of this.loops) {
       entry.start();
     }
   }
   stop() {
+    this.started = false;
     for (const [key, entry] of this.loops) {
       entry.stop();
     }
@@ -4528,6 +4532,9 @@ var FrameLoopManager = class {
   addLoop(name, loop) {
     if (this.loops.has(name)) {
       throw new Error("Loop name already used");
+    }
+    if (this.started) {
+      loop.start();
     }
     this.loops.set(name, loop);
     return () => {
@@ -4651,8 +4658,10 @@ SetTimeoutLoopFactory = __decorateClass([
 
 // src/services/perf/TimeLogger.ts
 var import_inversify5 = __toESM(require_inversify(), 1);
+var SUFFIX_DELIMITER = "-";
 var TimeLogger = class {
   getTimeLogger(name) {
+    name = name.replace(/-[^-]*$/, "");
     let minTimeMs = 0, maxTimeMs = 0, totalTimeMs = 0, sampleNumber = 0, meanTimeMs = 0, start = 0, last = 0;
     let callbacks1 = this.callbacks;
     return {
@@ -4729,6 +4738,7 @@ var AxLoopModule = class {
   AxLoopModule,
   FrameLoopManager,
   FrameLoopManagerName,
+  SUFFIX_DELIMITER,
   SetIntervalLoop,
   SetIntervalLoopFactory,
   SetIntervalLoopFactoryName,

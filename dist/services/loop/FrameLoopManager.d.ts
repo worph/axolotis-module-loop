@@ -1,5 +1,6 @@
 import { LoopInterface } from "./LoopInterface";
 export declare class FrameLoopManager {
+    started: boolean;
     constructor();
     loops: Map<string, LoopInterface>;
     start(): void;

@@ -5,10 +5,13 @@ export interface TimeLoggerInterface {
     monitoringEnd: () => void
 }
 
+export const SUFFIX_DELIMITER = "-";
+
 @injectable()
 export class TimeLogger {
 
     getTimeLogger(name: string): TimeLoggerInterface {
+        name = name.replace(/-[^-]*$/, "");//clean the name remove anythings after the last -
         let minTimeMs = 0,
             maxTimeMs = 0,
             totalTimeMs = 0,

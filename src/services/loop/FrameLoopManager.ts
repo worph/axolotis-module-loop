@@ -8,7 +8,7 @@ export class FrameLoopManager {
     // low workload adaptative loop? Like when FPS is green we execute code once evry Frame when it is not we execute once every seconde.
     // worker loop?
 
-
+    started = false;
     constructor() {
     }
 
@@ -16,12 +16,14 @@ export class FrameLoopManager {
 
 
     start() {
+        this.started = true;
         for (const [key,entry] of this.loops) {
             entry.start();
         }
     }
 
     stop() {
+        this.started = false;
         for (const [key,entry] of this.loops) {
             entry.stop();
         }
@@ -30,6 +32,9 @@ export class FrameLoopManager {
     addLoop(name:string,loop:LoopInterface): () => void {
         if(this.loops.has(name)){
             throw new Error("Loop name already used");
+        }
+        if(this.started) {
+            loop.start();
         }
         this.loops.set(name,loop);
         return () => {

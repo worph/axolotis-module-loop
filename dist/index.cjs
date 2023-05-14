@@ -4618,14 +4618,16 @@ var SetTimeoutLoop = class {
     this.enable = true;
     let prevTime = performance.now();
     const myLoop = () => {
-      const t = performance.now();
-      const delta = t - prevTime;
-      prevTime = t;
+      const startTaskTime = performance.now();
+      const delta = startTaskTime - prevTime;
+      prevTime = startTaskTime;
       this.timeLogger.monitoringStart();
       this.callback(delta);
       this.timeLogger.monitoringEnd();
+      const endTask = performance.now();
+      const taskDelta = endTask - startTaskTime;
       if (this.enable) {
-        setTimeout(myLoop, this.timeoutMs);
+        setTimeout(myLoop, taskDelta > this.timeoutMs ? 0 : this.timeoutMs - taskDelta);
       }
     };
     myLoop();

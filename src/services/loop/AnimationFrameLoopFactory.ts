@@ -43,6 +43,12 @@ export class AnimationFrameLoopFactory {
     ) {
     }
 
+    /**
+     * Create a loop based on requestAnimationFrame.
+     * Note tha if the focus is lost, the loop will be paused thus it should only be used for GFX and not for logic.
+     * @param name
+     * @param callback
+     */
     create(name: string, callback:LoopCallback,): LoopRemoverInterface {
         let loop = new AnimationFrameLoop(callback, this.timeLogger.getTimeLogger(name));
         this.frameLoop.addLoop(name,loop);

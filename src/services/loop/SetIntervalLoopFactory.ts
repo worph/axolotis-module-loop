@@ -68,6 +68,13 @@ export class SetIntervalLoopFactory {
     ) {
     }
 
+    /**
+     * Create a loop based on setInterval.
+     * See https://developer.mozilla.org/en-US/docs/Web/API/setInterval#ensure_that_execution_duration_is_shorter_than_interval_frequency
+     * @param name
+     * @param callback
+     * @param intervalMs
+     */
     create(name: string, callback:LoopCallback,intervalMs:number=0): LoopRemoverInterface {
         let loop = new SetIntervalLoop(callback, this.timeLogger.getTimeLogger(name),intervalMs);
         this.frameLoop.addLoop(name,loop);

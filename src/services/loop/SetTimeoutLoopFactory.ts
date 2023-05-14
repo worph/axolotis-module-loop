@@ -25,22 +25,24 @@ export class SetTimeoutLoop implements LoopInterface {
     }
 
     start() {
-        if(this.enable) {
+        if (this.enable) {
             throw new Error("Loop already started");
         }
         this.enable = true;
         let prevTime: number = performance.now();
         const myLoop = () => {
-            const t = performance.now();
-            const delta = t - prevTime;
-            prevTime = t;
+            const startTaskTime = performance.now();
+            const delta = startTaskTime - prevTime;
+            prevTime = startTaskTime;
             this.timeLogger.monitoringStart();
             // Your code here
             this.callback(delta);
             this.timeLogger.monitoringEnd();
+            const endTask = performance.now();
+            const taskDelta = endTask - startTaskTime;
             // Schedule the next call with a dynamic interval
             if (this.enable) {
-                setTimeout(myLoop, this.timeoutMs);
+                setTimeout(myLoop, (taskDelta > this.timeoutMs) ? 0 : (this.timeoutMs - taskDelta));
             }
         }
         // Start the loop
@@ -61,9 +63,18 @@ export class SetTimeoutLoopFactory {
     ) {
     }
 
-    create(name: string, callback:LoopCallback,timeoutMs:number = 0): LoopRemoverInterface {
-        let loop = new SetTimeoutLoop(callback, this.timeLogger.getTimeLogger(name),timeoutMs);
-        this.frameLoop.addLoop(name,loop);
+    /**
+     * Create a loop based on setTimeout.
+     * This loop will try its best to run at the given interval but will not run if the previous call is not finished. (Main difference with setInterval)
+     * If the task takes longer than the interval, the next call will be equivalent to a setTimeout(...,0).
+     * if the task takes less than the interval, the next call will be equivalent to a setTimeout(...,interval - taskTime).
+     * @param name
+     * @param callback
+     * @param timeoutMs
+     */
+    create(name: string, callback: LoopCallback, timeoutMs: number = 0): LoopRemoverInterface {
+        let loop = new SetTimeoutLoop(callback, this.timeLogger.getTimeLogger(name), timeoutMs);
+        this.frameLoop.addLoop(name, loop);
         return {
             loop: loop,
             remover: () => {

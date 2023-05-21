@@ -1,1 +1,0 @@
-{"version":3,"file":"LoopInterface.d.ts","sourceRoot":"","sources":["../../../src/services/loop/LoopInterface.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,aAAa;IAC1B,KAAK,IAAI,IAAI,CAAC;IACd,IAAI,IAAI,IAAI,CAAC;CAChB;AAED,MAAM,MAAM,YAAY,GAAG,CAAC,KAAK,EAAE,MAAM,KAAK,IAAI,CAAC;AAEnD,MAAM,WAAW,oBAAoB;IACjC,IAAI,EAAE,aAAa,CAAC;IACpB,OAAO,EAAE,MAAM,IAAI,CAAC;CACvB"}

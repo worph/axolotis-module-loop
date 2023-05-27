@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 import {AxModule} from "axolotis-module-definition";
 import {ContainerModule, interfaces} from "inversify";
 import {

@@ -49,7 +49,7 @@ export class AnimationFrameLoopFactory {
      * @param name
      * @param callback
      */
-    create(name: string, callback:LoopCallback,): LoopRemoverInterface {
+    create(name: string, callback:LoopCallback): LoopRemoverInterface {
         let loop = new AnimationFrameLoop(callback, this.timeLogger.getTimeLogger(name));
         this.frameLoop.addLoop(name,loop);
         return {

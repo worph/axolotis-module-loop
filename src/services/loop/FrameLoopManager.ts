@@ -31,7 +31,7 @@ export class FrameLoopManager {
 
     addLoop(name:string,loop:LoopInterface): () => void {
         if(this.loops.has(name)){
-            throw new Error("Loop name already used");
+            throw new Error("Loop name already used :"+name);
         }
         if(this.started) {
             loop.start();

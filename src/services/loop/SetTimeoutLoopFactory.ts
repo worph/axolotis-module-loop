@@ -68,6 +68,9 @@ export class SetTimeoutLoopFactory {
      * This loop will try its best to run at the given interval but will not run if the previous call is not finished. (Main difference with setInterval)
      * If the task takes longer than the interval, the next call will be equivalent to a setTimeout(...,0).
      * if the task takes less than the interval, the next call will be equivalent to a setTimeout(...,interval - taskTime).
+     * This will work even if the tab is not active but is throtle to 1S
+     * Browsers throttle setTimeout calls to a maximum of 1 per second when a tab is hidden to maximize performance on active tabs
+     * https://developer.mozilla.org/en-US/docs/Web/API/setTimeout#Inactive_tabs
      * @param name
      * @param callback
      * @param timeoutMs

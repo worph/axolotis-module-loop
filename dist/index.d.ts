@@ -26,7 +26,7 @@ interface TimeLoggerInterface {
     monitoringEnd: () => void;
 }
 declare const SUFFIX_DELIMITER = "-";
-declare class TimeLogger {
+declare class LoopTimeLogger {
     getTimeLogger(name: string): TimeLoggerInterface;
     callbacks: ({
         refreshInterval: number;
@@ -47,7 +47,7 @@ declare class AnimationFrameLoop implements LoopInterface {
 declare class AnimationFrameLoopFactory {
     private timeLogger;
     private frameLoop;
-    constructor(timeLogger: TimeLogger, frameLoop: FrameLoopManager);
+    constructor(timeLogger: LoopTimeLogger, frameLoop: FrameLoopManager);
     create(name: string, callback: LoopCallback): LoopRemoverInterface;
 }
 
@@ -63,7 +63,7 @@ declare class SetIntervalLoop implements LoopInterface {
 declare class SetIntervalLoopFactory {
     private timeLogger;
     private frameLoop;
-    constructor(timeLogger: TimeLogger, frameLoop: FrameLoopManager);
+    constructor(timeLogger: LoopTimeLogger, frameLoop: FrameLoopManager);
     create(name: string, callback: LoopCallback, intervalMs?: number): LoopRemoverInterface;
 }
 
@@ -79,7 +79,7 @@ declare class SetTimeoutLoop implements LoopInterface {
 declare class SetTimeoutLoopFactory {
     private timeLogger;
     private frameLoop;
-    constructor(timeLogger: TimeLogger, frameLoop: FrameLoopManager);
+    constructor(timeLogger: LoopTimeLogger, frameLoop: FrameLoopManager);
     create(name: string, callback: LoopCallback, timeoutMs?: number): LoopRemoverInterface;
 }
 
@@ -87,10 +87,10 @@ declare const FrameLoopManagerName: unique symbol;
 declare const AnimationFrameLoopFactoryName: unique symbol;
 declare const SetIntervalLoopFactoryName: unique symbol;
 declare const SetTimeoutLoopFactoryName: unique symbol;
-declare const TimeLoggerName: unique symbol;
+declare const LoopTimeLoggerName: unique symbol;
 
 declare class AxLoopModule implements AxModule {
     getModule(): ContainerModule;
 }
 
-export { AnimationFrameLoop, AnimationFrameLoopFactory, AnimationFrameLoopFactoryName, AxLoopModule, FrameLoopManager, FrameLoopManagerName, LoopCallback, LoopInterface, LoopRemoverInterface, SUFFIX_DELIMITER, SetIntervalLoop, SetIntervalLoopFactory, SetIntervalLoopFactoryName, SetTimeoutLoop, SetTimeoutLoopFactory, SetTimeoutLoopFactoryName, TimeLogger, TimeLoggerInterface, TimeLoggerName };
+export { AnimationFrameLoop, AnimationFrameLoopFactory, AnimationFrameLoopFactoryName, AxLoopModule, FrameLoopManager, FrameLoopManagerName, LoopCallback, LoopInterface, LoopRemoverInterface, LoopTimeLogger, LoopTimeLoggerName, SUFFIX_DELIMITER, SetIntervalLoop, SetIntervalLoopFactory, SetIntervalLoopFactoryName, SetTimeoutLoop, SetTimeoutLoopFactory, SetTimeoutLoopFactoryName, TimeLoggerInterface };

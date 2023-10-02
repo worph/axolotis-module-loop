@@ -8,7 +8,7 @@ export interface TimeLoggerInterface {
 export const SUFFIX_DELIMITER = "-";
 
 @injectable()
-export class TimeLogger {
+export class LoopTimeLogger {
 
     getTimeLogger(name: string): TimeLoggerInterface {
         name = name.replace(/-[^-]*$/, "");//clean the name remove anythings after the last -

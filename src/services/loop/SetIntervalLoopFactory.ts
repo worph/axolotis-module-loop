@@ -1,6 +1,6 @@
 import {inject, injectable} from "inversify";
-import {FrameLoopManagerName, TimeLoggerName} from "../../Identifier";
-import {TimeLogger, TimeLoggerInterface} from "../perf/TimeLogger";
+import {FrameLoopManagerName, LoopTimeLoggerName} from "../../Identifier";
+import {LoopTimeLogger, TimeLoggerInterface} from "../perf/LoopTimeLogger";
 import {FrameLoopManager} from "./FrameLoopManager";
 import {LoopCallback, LoopInterface, LoopRemoverInterface} from "./LoopInterface";
 
@@ -63,7 +63,7 @@ export class SetIntervalLoop implements LoopInterface {
 export class SetIntervalLoopFactory {
 
     constructor(
-        @inject(TimeLoggerName) private timeLogger:TimeLogger,
+        @inject(LoopTimeLoggerName) private timeLogger:LoopTimeLogger,
         @inject(FrameLoopManagerName) private frameLoop: FrameLoopManager
     ) {
     }
